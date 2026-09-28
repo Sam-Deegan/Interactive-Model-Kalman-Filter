@@ -7,7 +7,7 @@ ECON42240 Advanced Macroeconomics, University College Dublin.
 **Try it in the browser (nothing to install):**
 https://sam-deegan.com/toy-models/state-space/
 
-Current version: **1.0.4** (see [CHANGELOG.md](CHANGELOG.md)). The version
+Current version: **1.0.5** (see [CHANGELOG.md](CHANGELOG.md)). The version
 is shown in the app footer; releases are tagged `vX.Y.Z`.
 
 ## What it does

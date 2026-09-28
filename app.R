@@ -762,7 +762,7 @@ B_03_16_figfile_vec <- c(
 ###### B_03_17: Version ########################################################
 # Note: Shown in the footer; history in CHANGELOG.md.
 
-B_03_17_version_chr <- "1.0.4"
+B_03_17_version_chr <- "1.0.5"
 
 ###### B_03_18: Source Repository ##############################################
 # Note: The GitHub repo, linked from the footer.
@@ -847,13 +847,6 @@ D_02_01_gain_fn <- function(par, ref = NULL) {
              hjust = 0, vjust = 0.5, size = 3.8,
              colour = T_01_02_series_vec[["main"]],
              label = "gain (K)") +
-    # What the filter does at each end, in the two empty corners
-    annotate("text", x = -1.94, y = 0.20, hjust = 0, vjust = 0.5,
-             size = 3.8, colour = T_01_02_series_vec[["annot"]],
-             label = "trust the data") +
-    annotate("text", x = 1.94, y = 0.88, hjust = 1, vjust = 0.5,
-             size = 3.8, colour = T_01_02_series_vec[["annot"]],
-             label = "trust the model") +
     T_02_02_mark_y_fn(now, expression(K), breaks = seq(0, 1, 0.25)) +
     T_02_02_mark_x_fn(x_now, expression(sigma[v]^2), breaks = -2:2,
                       labels = c("0.01", "0.1", "1", "10", "100")) +
@@ -866,9 +859,14 @@ D_02_01_gain_fn <- function(par, ref = NULL) {
         "The steady-state Kalman gain (K) is ", T_02_05_num_fn(now, 3),
         ". The noise ratio is ", T_02_05_num_fn(par$sigma_v2 / par$sigma_u2, 2),
         ", the state variance being held at one, so the horizontal axis is",
-        " both variances at once. The curve approaches one at the left",
-        " without reaching it: the gain is one exactly at a measurement",
-        " variance of zero, which a log axis cannot show."
+        " both variances at once. K is the weight the update puts on the",
+        " new observation. At the left the observation is precise relative",
+        " to the state shock, so K is near one and each update moves the",
+        " estimate almost all the way to the observation; at the right the",
+        " observation is noisy, so K is small and the estimate stays close",
+        " to the forecast from the state equation. The curve approaches",
+        " one without reaching it: K is one only at a measurement variance",
+        " of zero, which a log axis cannot show."
       )
     ) +
     T_02_01_theme_fn() +
