@@ -762,7 +762,7 @@ B_03_16_figfile_vec <- c(
 ###### B_03_17: Version ########################################################
 # Note: Shown in the footer; history in CHANGELOG.md.
 
-B_03_17_version_chr <- "1.0.6"
+B_03_17_version_chr <- "1.0.7"
 
 ###### B_03_18: Source Repository ##############################################
 # Note: The GitHub repo, linked from the footer.
@@ -856,17 +856,12 @@ D_02_01_gain_fn <- function(par, ref = NULL) {
       x = expression(bold("Measurement Variance (" * sigma[v]^2 * ")")),
       y = expression(bold("Kalman Gain (" * K * ")")),
       caption = paste0(
-        "The steady-state Kalman gain (K) is ", T_02_05_num_fn(now, 3),
-        ". The noise ratio is ", T_02_05_num_fn(par$sigma_v2 / par$sigma_u2, 2),
-        ", the state variance being held at one, so the horizontal axis is",
-        " both variances at once. K is the weight the update puts on the",
-        " new observation. At the left the observation is precise relative",
-        " to the state shock, so K is near one and each update moves the",
-        " estimate almost all the way to the observation; at the right the",
-        " observation is noisy, so K is small and the estimate stays close",
-        " to the forecast from the state equation. The curve approaches",
-        " one without reaching it: K is one only at a measurement variance",
-        " of zero, which a log axis cannot show."
+        "K is the weight each update puts on the new observation. Here it",
+        " is ", T_02_05_num_fn(now, 3), ", at a noise ratio of ",
+        T_02_05_num_fn(par$sigma_v2 / par$sigma_u2, 2),
+        ". Precise observations (left) get most of the weight; noisy ones",
+        " (right) get little, and the estimate follows the state equation's",
+        " own forecast instead."
       )
     ) +
     T_02_01_theme_fn() +
@@ -1507,41 +1502,24 @@ F_01_01_app_server_fn <- function(input, output, session) {
       class = "narrative",
       tags$div(class = "nar-head", "Where the Curve Comes From"),
       tags$p(HTML(paste(
-        "This figure can be drawn before a single observation arrives,",
-        "because the variance recursion never looks at one:",
+        "The variance recursion,",
         "&sigma;<sup>2</sup><sub>t|t</sub> = (1 &minus;",
         "K<sub>t</sub>)&sigma;<sup>2</sup><sub>t|t-1</sub> and",
         "&sigma;<sup>2</sup><sub>t+1|t</sub> =",
-        "&sigma;<sup>2</sup><sub>t|t</sub> + &sigma;<sub>u</sub><sup>2</sup>",
-        "depend on the two noise variances and nothing else. The gain path",
-        "is therefore fixed in advance, and after a few periods it stops",
-        "moving. That resting value is the steady-state gain, and it is what",
-        "the curve plots against the measurement variance."
+        "&sigma;<sup>2</sup><sub>t|t</sub> + &sigma;<sub>u</sub><sup>2</sup>,",
+        "uses no data, so the gain path is known in advance and settles to",
+        "a steady state. Setting the prediction variance equal across",
+        "periods turns the recursion into a quadratic (the Riccati equation,",
+        "Hamilton 1994 ch. 13). In terms of the gain and the noise ratio q =",
+        "&sigma;<sub>v</sub><sup>2</sup>/&sigma;<sub>u</sub><sup>2</sup>",
+        "it is qK<sup>2</sup> + K &minus; 1 = 0, which is the curve here."
       ))),
       tags$p(HTML(paste(
-        "To find it, set the prediction variance equal in successive",
-        "periods, &sigma;<sup>2</sup><sub>t+1|t</sub> =",
-        "&sigma;<sup>2</sup><sub>t|t-1</sub> = &sigma;&#772;<sup>2</sup>,",
-        "and the recursion collapses to a quadratic,",
-        "(&sigma;&#772;<sup>2</sup>)<sup>2</sup> &minus;",
-        "&sigma;<sub>u</sub><sup>2</sup>&sigma;&#772;<sup>2</sup> &minus;",
-        "&sigma;<sub>u</sub><sup>2</sup>&sigma;<sub>v</sub><sup>2</sup> = 0,",
-        "the algebraic Riccati equation of Hamilton (1994, ch. 13). Its",
-        "positive root is the variance the second figure shows the recursion",
-        "settling on. Written in terms of the gain and the noise ratio q =",
-        "&sigma;<sub>v</sub><sup>2</sup>/&sigma;<sub>u</sub><sup>2</sup>,",
-        "the same condition reads qK<sup>2</sup> + K &minus; 1 = 0, and that",
-        "is the curve drawn here."
-      ))),
-      tags$p(HTML(paste(
-        "Two things are worth reading off it. Equal noise variances (q = 1)",
-        "give K = 0.618 rather than a half: the state is a random walk, so",
-        "by the time an observation arrives the forecast has picked up a",
-        "further period of state noise and is the less precise of the two,",
-        "and the observation gets the larger weight. And the curve reaches",
-        "neither end. K tends to one as q tends to zero and to zero as q",
-        "grows without bound, so at the left edge of the panel the gain is",
-        "0.990, not one."
+        "Equal variances (q = 1) give K = 0.618, not a half. The state is",
+        "a random walk, so the forecast carries an extra period of noise by",
+        "the time the observation arrives, and the observation wins. K",
+        "tends to one as q tends to zero but never reaches it: at the left",
+        "edge of the panel it is 0.990."
       )))
     )
   })
@@ -1552,34 +1530,26 @@ F_01_01_app_server_fn <- function(input, output, session) {
       class = "narrative",
       tags$div(class = "nar-head", "One-Sided, Two-Sided, and the HP Filter"),
       tags$p(HTML(paste(
-        "<strong>The filter is one-sided.</strong> S<sub>t|t</sub> uses",
-        "Z<sub>1</sub> to Z<sub>t</sub> and nothing after. It is a model of",
-        "what someone learning about the state in real time would have",
-        "believed, which is why studies of real-time policy use it."
+        "The filter is one-sided: S<sub>t|t</sub> uses Z<sub>1</sub> to",
+        "Z<sub>t</sub> and nothing after, so it is what someone tracking the",
+        "state in real time would have believed. The smoother is two-sided:",
+        "S<sub>t|T</sub> uses the whole sample, and the backward pass revises",
+        "each earlier estimate with what came after it. That makes it",
+        "steadier and closer to the state, but only where the gain is low",
+        "enough to leave something for later data to add."
       ))),
       tags$p(HTML(paste(
-        "<strong>The smoother is two-sided.</strong> S<sub>t|T</sub> uses the",
-        "whole sample. The backward pass revises each earlier estimate with",
-        "what came after it, so it is steadier and closer to the state —",
-        "but only where the gain is low enough to leave something for later",
-        "data to add."
+        "The two meet at T. There is no data after the last period for the",
+        "backward pass to use, so S<sub>T|T</sub> is both the filtered and",
+        "the smoothed estimate, and the revision figure goes to zero there.",
+        "A central bank reads its latest estimate at exactly this point, at",
+        "its least revised, which matters for the natural rate of interest."
       ))),
       tags$p(HTML(paste(
-        "<strong>They meet at T, and they must.</strong> There is no data",
-        "after the last period for the backward pass to use, so",
-        "S<sub>T|T</sub> is both the filtered and the smoothed estimate of",
-        "the last observation. The revision figure shows it going to exactly",
-        "zero there. A central bank reads the latest estimate at its least",
-        "revised, which is the lecture's section on the natural rate of",
-        "interest."
-      ))),
-      tags$p(HTML(paste(
-        "<strong>The Hodrick&ndash;Prescott filter is the SMOOTHER.</strong>",
-        "Its objective is minimised over the whole sample at once, so the",
-        "trend it returns at period t depends on observations after t. By the",
-        "definition two paragraphs up that is a two-sided estimate, which is",
-        "the smoother, whatever the object is called. The name is a historical",
-        "accident and the algebra is not ambiguous."
+        "The Hodrick&ndash;Prescott filter is a smoother, not a filter. Its",
+        "objective is minimised over the whole sample at once, so the trend",
+        "at period t depends on observations after t. That is a two-sided",
+        "estimate whatever the name says."
       )))
     )
   })
