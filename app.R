@@ -762,7 +762,7 @@ B_03_16_figfile_vec <- c(
 ###### B_03_17: Version ########################################################
 # Note: Shown in the footer; history in CHANGELOG.md.
 
-B_03_17_version_chr <- "1.0.2"
+B_03_17_version_chr <- "1.0.3"
 
 ###### B_03_18: Source Repository ##############################################
 # Note: The GitHub repo, linked from the footer.
@@ -1164,7 +1164,8 @@ E_01_02_sidebar_lst <- sidebar(
     )
   ),
   actionButton("reset", "Reset Everything",
-               class = "btn-outline-secondary btn-sm w-100")
+               class = "btn-outline-secondary btn-sm w-100"),
+  T_07_10b_sidebarqr_fn(B_04_01_qr_src_chr)
 )
 
 #### E_02: Main Panel ##########################################################
