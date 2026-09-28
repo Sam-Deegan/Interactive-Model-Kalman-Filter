@@ -32,9 +32,9 @@
 ##   B_03_17_version_chr; history in CHANGELOG.md; git tag vX.Y.Z.
 ##
 ## Outputs:
-##   None on its own. Each figure has Save PNG and Save PDF buttons that
-##   write it through T_02_03c_export_fn at 2:1, 1600 x 800 px, named
-##   state-space-{stage}-{figure}.png or .pdf.
+##   None on its own. Each figure has a Save PNG button that writes it
+##   through T_02_03c_export_fn at 2:1, 1600 x 800 px, named
+##   state-space-{stage}-{figure}.png.
 ##
 ## Packages:
 ##   shiny, bslib, ggplot2.
@@ -762,7 +762,7 @@ B_03_16_figfile_vec <- c(
 ###### B_03_17: Version ########################################################
 # Note: Shown in the footer; history in CHANGELOG.md.
 
-B_03_17_version_chr <- "1.0.5"
+B_03_17_version_chr <- "1.0.6"
 
 ###### B_03_18: Source Repository ##############################################
 # Note: The GitHub repo, linked from the footer.
@@ -802,7 +802,7 @@ D_01_01_spread_fn <- function(y, gap) {
 
 ###### D_01_02: Name One Exported Figure #######################################
 # Note: The stem {app}-{stage}-{figure} that T_07_07h_exports_fn adds ".png"
-#   or ".pdf" to. Script-level so tests/verify_model.R can check the name.
+#   to. Script-level so tests/verify_model.R can check the name.
 
 D_01_02_figstem_fn <- function(id, stage) {
   paste0("state-space-", stage, "-", B_03_16_figfile_vec[[id]])
@@ -1485,7 +1485,7 @@ F_01_01_app_server_fn <- function(input, output, session) {
   }) }, res = 96)
 
   # --- PNG and PDF export per figure ------------------------------------------
-  # T_07_07h_exports_fn registers <id>__png and <id>__pdf from the same
+  # T_07_07h_exports_fn registers <id>__png from the same
   # builder the screen calls; the stage is read at download time
   export_fn <- function(id, builder) {
     T_07_07h_exports_fn(
@@ -1507,42 +1507,41 @@ F_01_01_app_server_fn <- function(input, output, session) {
       class = "narrative",
       tags$div(class = "nar-head", "Where the Curve Comes From"),
       tags$p(HTML(paste(
-        "<strong>The variance recursion ignores the data.</strong>",
+        "This figure can be drawn before a single observation arrives,",
+        "because the variance recursion never looks at one:",
         "&sigma;<sup>2</sup><sub>t|t</sub> = (1 &minus;",
         "K<sub>t</sub>)&sigma;<sup>2</sup><sub>t|t-1</sub> and",
         "&sigma;<sup>2</sup><sub>t+1|t</sub> =",
-        "&sigma;<sup>2</sup><sub>t|t</sub>",
-        "+ &sigma;<sub>u</sub><sup>2</sup>",
-        "contain no Z<sub>t</sub>, so the whole gain path is fixed before the",
-        "first observation arrives. That is why this exhibit is drawn rather",
-        "than estimated, and it is why a steady state exists at all."
+        "&sigma;<sup>2</sup><sub>t|t</sub> + &sigma;<sub>u</sub><sup>2</sup>",
+        "depend on the two noise variances and nothing else. The gain path",
+        "is therefore fixed in advance, and after a few periods it stops",
+        "moving. That resting value is the steady-state gain, and it is what",
+        "the curve plots against the measurement variance."
       ))),
       tags$p(HTML(paste(
-        "<strong>The steady state solves a quadratic.</strong> Setting",
-        "&sigma;<sup>2</sup><sub>t|t-1</sub> =",
-        "&sigma;<sup>2</sup><sub>t+1|t</sub> = &sigma;&#772;<sup>2</sup> and",
-        "clearing the denominator gives",
+        "To find it, set the prediction variance equal in successive",
+        "periods, &sigma;<sup>2</sup><sub>t+1|t</sub> =",
+        "&sigma;<sup>2</sup><sub>t|t-1</sub> = &sigma;&#772;<sup>2</sup>,",
+        "and the recursion collapses to a quadratic,",
         "(&sigma;&#772;<sup>2</sup>)<sup>2</sup> &minus;",
         "&sigma;<sub>u</sub><sup>2</sup>&sigma;&#772;<sup>2</sup> &minus;",
         "&sigma;<sub>u</sub><sup>2</sup>&sigma;<sub>v</sub><sup>2</sup> = 0,",
-        "the algebraic Riccati equation for this model. Its positive root is",
-        "the prediction variance the second figure is shown finding."
+        "the algebraic Riccati equation of Hamilton (1994, ch. 13). Its",
+        "positive root is the variance the second figure shows the recursion",
+        "settling on. Written in terms of the gain and the noise ratio q =",
+        "&sigma;<sub>v</sub><sup>2</sup>/&sigma;<sub>u</sub><sup>2</sup>,",
+        "the same condition reads qK<sup>2</sup> + K &minus; 1 = 0, and that",
+        "is the curve drawn here."
       ))),
       tags$p(HTML(paste(
-        "<strong>The gain has a tidier one.</strong> With q =",
-        "&sigma;<sub>v</sub><sup>2</sup>/&sigma;<sub>u</sub><sup>2</sup> the",
-        "gain solves qK<sup>2</sup> + K &minus; 1 = 0. At q = 1 that is",
-        "K<sup>2</sup> + K &minus; 1 = 0, so equal variances give a gain of",
-        "0.618 and not a half: the state is a random walk, so its prediction",
-        "variance carries an extra period of state noise and the data win on",
-        "balance."
-      ))),
-      tags$p(HTML(paste(
-        "<strong>The two ends are limits, not readings.</strong> q =",
-        "(1 &minus; K)/K<sup>2</sup> falls throughout in K, so the curve is",
-        "monotone with no turning point. K &rarr; 1 as q &rarr; 0 and",
-        "K &rarr; 0 as q &rarr; &infin;, and neither end is on a log axis:",
-        "at the left of the panel the gain is 0.990, not one."
+        "Two things are worth reading off it. Equal noise variances (q = 1)",
+        "give K = 0.618 rather than a half: the state is a random walk, so",
+        "by the time an observation arrives the forecast has picked up a",
+        "further period of state noise and is the less precise of the two,",
+        "and the observation gets the larger weight. And the curve reaches",
+        "neither end. K tends to one as q tends to zero and to zero as q",
+        "grows without bound, so at the left edge of the panel the gain is",
+        "0.990, not one."
       )))
     )
   })

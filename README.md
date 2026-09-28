@@ -7,7 +7,7 @@ ECON42240 Advanced Macroeconomics, University College Dublin.
 **Try it in the browser (nothing to install):**
 https://sam-deegan.com/toy-models/state-space/
 
-Current version: **1.0.5** (see [CHANGELOG.md](CHANGELOG.md)). The version
+Current version: **1.0.6** (see [CHANGELOG.md](CHANGELOG.md)). The version
 is shown in the app footer; releases are tagged `vX.Y.Z`.
 
 ## What it does
@@ -25,7 +25,7 @@ very noisy data, the filter following the data or the model, where smoothing
 helps most and where it barely matters). Every slider has a box beside it for
 an exact value. The Equations, Notation and In Words tabs show the model as
 it stands at the chosen stage and flag what that stage added. Each figure
-has Save PNG and Save PDF buttons that write it at 2:1, 1600 x 800 px.
+has Save PNG buttons that write it at 2:1, 1600 x 800 px.
 
 The series in stages 2 and 3 is simulated from the model at a seed you
 choose; it is never presented as data.
