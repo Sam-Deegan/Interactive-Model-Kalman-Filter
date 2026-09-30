@@ -18,8 +18,8 @@
 ##   R/model.R, then app.R.
 ##
 ## Outputs:
-##   A line per check on the console. Checks G and H write PNGs and PDFs to
-##   a temporary directory and delete them again.
+##   A line per check on the console. Checks G and H write PNGs to a
+##   temporary directory and delete them again.
 ##
 ## Packages:
 ##   None for A to E; shiny, bslib, ggplot2, htmltools, xml2 for F to J.
@@ -39,14 +39,15 @@
 ##      at lambda = sigma_c^2 / sigma_g^2 (slide 14).
 ##   F  The equations panel, notation key and In Words tab are complete and
 ##      consistent with one another.
-##   G  Every figure exports at 1600 x 800 px, no squarer than 3:2, under
+##   G  Every figure exports at 1500 x 1000 px, no squarer than 3:2, under
 ##      the right file name.
-##   H  The app driven headlessly through every stage, preset and download
-##      handler.
+##   H  The app driven headlessly through every stage, preset and PNG
+##      download handler.
 ##   I  Strings and colours: the deck's notation on screen, no stale
 ##      pointers, the series colours in the deck's order.
-##   J  The page renders, every plot sits in a T_07_07f card with both Save
-##      buttons, the figures sit two to a row, no Greek letter is spelt out.
+##   J  The page renders, every plot sits in a T_07_07f card with its Save
+##      PNG button, the figures sit two to a row, no Greek letter is spelt
+##      out.
 ##
 ## References:
 ##   Whelan, K. MA Advanced Macroeconomics, part 5. Slides 4-5 (conditional
@@ -792,7 +793,7 @@ for (V_07_03_id_chr in names(V_07_01_figs_lst)) {
 unlink(V_07_03_dir_chr, recursive = TRUE)
 
 ###### V_07_04: The Panel Inside the PNG Is Not Squarer Either #################
-# Note: A 2:1 PNG can still hold a square panel. aspect.ratio is height over
+# Note: A 3:2 PNG can still hold a square panel. aspect.ratio is height over
 #   width, so the floor is 1/1.5 and a smaller number is wider.
 
 for (V_07_04_id_chr in names(V_07_01_figs_lst)) {
@@ -852,7 +853,7 @@ for (V_08_02_i_int in seq_along(V_08_02_ok_lgl)) {
 }
 
 ###### V_08_03: Every Download Handler Runs ####################################
-# Note: testServer runs each downloadHandler and hands back the path it
+# Note: testServer runs each PNG downloadHandler and hands back the path it
 #   wrote: the file a browser would receive, with its name, size and shape.
 #   Files are inspected inside the block, since testServer cleans them up.
 
@@ -863,14 +864,10 @@ tryCatch(
     do.call(session$setInputs, c(list(stage = "3"), V_08_01_inputs_lst))
     for (id in names(V_07_01_figs_lst)) {
       path <- output[[paste0(id, "__png")]]
-      pdf  <- output[[paste0(id, "__pdf")]]
       V_08_03_got_lst[[id]] <<- list(
         name = basename(path),
         size = if (file.exists(path)) file.size(path) else 0,
-        dim  = if (file.exists(path)) V_07_02_dim_fn(path) else c(0, 0),
-        pdf_name = basename(pdf),
-        pdf_ok   = file.exists(pdf) && identical(
-          readBin(pdf, "raw", 4L), charToRaw("%PDF"))
+        dim  = if (file.exists(path)) V_07_02_dim_fn(path) else c(0, 0)
       )
     }
   }),
@@ -886,15 +883,11 @@ for (V_08_03_id_chr in names(V_07_01_figs_lst)) {
     sprintf("H. %-8s download is named for its stage", V_08_03_id_chr),
     V_08_03_ok_lgl && identical(V_08_03_got$name,
                                 D_01_03_figfile_fn(V_08_03_id_chr, "3")))
+  # ggsave rounds the dpi it is handed, so the same one-pixel tolerance as G
   B_02_03_true_fn(
-    sprintf("H. %-8s download is 1600 x 800 px", V_08_03_id_chr),
-    V_08_03_ok_lgl && identical(V_08_03_got$dim, V_07_03_want_int))
-  B_02_03_true_fn(
-    sprintf("H. %-8s PDF download is a PDF, named for its stage",
-            V_08_03_id_chr),
-    !is.null(V_08_03_got) && isTRUE(V_08_03_got$pdf_ok) &&
-      identical(V_08_03_got$pdf_name,
-                D_01_03_figfile_fn(V_08_03_id_chr, "3", "pdf")))
+    sprintf("H. %-8s download is %d x %d px", V_08_03_id_chr,
+            V_07_03_want_int[1], V_07_03_want_int[2]),
+    V_08_03_ok_lgl && all(abs(V_08_03_got$dim - V_07_03_want_int) <= 1))
 }
 
 ###### V_08_04: Every Preset Loads #############################################
@@ -922,8 +915,8 @@ B_02_03_true_fn(sprintf("H. every worked example loads (%d)",
                 all(V_08_04_ok_lgl))
 
 #### V_08b: The Page Uses the Toolkit's Figure Card ############################
-# Note: Every plotOutput sits in a T_07_07f card (class fig-card, the 2:1
-#   wrapper, both Save buttons), the UI renders to HTML, and no label or
+# Note: Every plotOutput sits in a T_07_07f card (class fig-card, the 3:2
+#   wrapper, the Save PNG button), the UI renders to HTML, and no label or
 #   header spells a Greek letter out.
 
 ###### V_08b_01: The UI Renders ################################################
@@ -936,7 +929,8 @@ V_08b_01_html_chr <- tryCatch(htmltools::renderTags(E_02_02_app_ui_lst)$html,
 B_02_03_true_fn("J. the page renders to HTML", nzchar(V_08b_01_html_chr))
 
 ###### V_08b_02: Every Plot Sits in a Toolkit Card #############################
-# Note: Exactly five figures, each inside a fig-card with a PNG and a PDF link.
+# Note: Exactly five figures, each inside a fig-card whose header carries the
+#   title slot and the Save PNG link, over a 3:2 wrapper around the plot.
 
 V_08b_02_doc <- xml2::read_html(V_08b_01_html_chr)
 V_08b_02_ids_chr <- xml2::xml_attr(
@@ -952,11 +946,13 @@ for (V_08b_02_id_chr in V_08b_02_ids_chr) {
     V_08b_02_id_chr))
   V_08b_02_ok_lgl <- !inherits(V_08b_02_card, "xml_missing") &&
     length(xml2::xml_find_all(V_08b_02_card, sprintf(
-      ".//div[contains(@class,'fig-r21')]/div[@id='%s']",
+      ".//div[contains(@class,'fig-r32')]/div[@id='%s']",
       V_08b_02_id_chr))) == 1L &&
     length(xml2::xml_find_all(V_08b_02_card, sprintf(
-      ".//a[@id='%s__png' or @id='%s__pdf']", V_08b_02_id_chr,
-      V_08b_02_id_chr))) == 2L
+      paste0(".//div[contains(@class,'card-header')]",
+             "//div[contains(@class,'fig-head')]",
+             "/a[@id='%s__png' and contains(@class,'fig-save')]"),
+      V_08b_02_id_chr))) == 1L
   B_02_03_true_fn(sprintf("J. %-8s sits in a T_07_07f card", V_08b_02_id_chr),
                   V_08b_02_ok_lgl)
 }
@@ -972,11 +968,13 @@ B_02_03_true_fn("J. no local figure card, button CSS or downloadHandler",
 
 ###### V_08b_04: Figures Sit Two to a Row ######################################
 # Note: Two plots share a row when their nearest layout_columns grid is the
-#   same element. The filter figure is alone.
+#   same element. The filter figure is alone. bslib writes the grid as a div
+#   or as its own bslib-layout-columns element, depending on version, so the
+#   ancestor is matched by class alone.
 
 V_08b_04_grid_fn <- function(id) {
   xml2::xml_find_first(V_08b_02_doc, sprintf(
-    paste0("//div[@id='%s']/ancestor::div",
+    paste0("//div[@id='%s']/ancestor::*",
            "[contains(concat(' ', @class, ' '), ' bslib-grid ')][1]"), id))
 }
 V_08b_04_same_fn <- function(a, b) {

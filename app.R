@@ -33,7 +33,7 @@
 ##
 ## Outputs:
 ##   None on its own. Each figure has a Save PNG button that writes it
-##   through T_02_03c_export_fn at 2:1, 1600 x 800 px, named
+##   through T_02_03c_export_fn at 3:2, 1500 x 1000 px, named
 ##   state-space-{stage}-{figure}.png.
 ##
 ## Packages:
@@ -715,11 +715,11 @@ B_03_11_nota_cols_lst <- list(
 )
 
 ###### B_03_12: Figure Shape and Height ########################################
-# Note: Every figure is 2:1 (see CONVENTIONS.md 6). B_03_12_aspect_num is
+# Note: Every figure is 3:2 (see CONVENTIONS.md 6). B_03_12_aspect_num is
 #   ggplot's aspect.ratio, height over width; B_03_12_tall_chr is the fallback
 #   plot height for a browser without CSS aspect-ratio.
 
-B_03_12_aspect_num <- 0.5
+B_03_12_aspect_num <- 2 / 3
 B_03_12_tall_chr   <- "320px"
 
 ###### B_03_13: Recalculation Delay ############################################
@@ -737,13 +737,13 @@ B_03_14_xlim_vec   <- c(-2, 2)
 B_03_14_ylim_vec   <- c(0, 1.06)
 
 ###### B_03_15: Export Size ####################################################
-# Note: The size a figure is written at: 8 x 4 in at 200 dpi, 1600 x 800 px,
-#   through T_02_03c_export_fn with pair = FALSE. tests/verify_model.R reads
-#   the pixel size from here.
+# Note: The size a figure is written at: 7.5 x 5 in at 200 dpi, 1500 x 1000
+#   px, through T_02_03c_export_fn with pair = FALSE. tests/verify_model.R
+#   reads the pixel size from here.
 
 B_03_15_export_lst <- list(
-  width_in  = 8,
-  height_in = 4,
+  width_in  = 7.5,
+  height_in = 5,
   dpi_int   = 200
 )
 
@@ -762,7 +762,7 @@ B_03_16_figfile_vec <- c(
 ###### B_03_17: Version ########################################################
 # Note: Shown in the footer; history in CHANGELOG.md.
 
-B_03_17_version_chr <- "1.0.7"
+B_03_17_version_chr <- "1.0.8"
 
 ###### B_03_18: Source Repository ##############################################
 # Note: The GitHub repo, linked from the footer.
@@ -1199,7 +1199,7 @@ E_02_02_app_ui_lst <- tagList(
   uiOutput("prompt"),
   uiOutput("problems"),
   uiOutput("tiles"),
-  # Two figures to a row, each held at 2:1 by the card; the filter figure
+  # Two figures to a row, each held at 3:2 by the card; the filter figure
   #   has no partner and takes a half-width row of its own
   T_07_07g_pair_fn(
     T_07_07f_figcard_fn("gain", "The Gain Against the Noise Ratio",
